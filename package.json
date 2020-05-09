@@ -1,0 +1,16 @@
+{
+  "name": "junopass-js",
+  "version": "1.0.0",
+  "description": "Passwordless and OTP authentication for the web",
+  "main": "index.js",
+  "repository": "git@github.com:JunoPass/junopass-js.git",
+  "author": "Felix Cheruiyot <felix.cheruiyot@kenyaapps.net>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0"
+  }
+}
