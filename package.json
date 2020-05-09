@@ -6,11 +6,15 @@
   "repository": "git@github.com:JunoPass/junopass-js.git",
   "author": "Felix Cheruiyot <felix.cheruiyot@kenyaapps.net>",
   "license": "MIT",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "axios": "^0.19.2",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "mocha": "^7.1.2",
     "webpack": "^4.43.0"
   }
 }
