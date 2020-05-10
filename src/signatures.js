@@ -1,11 +1,16 @@
+import nacl from "tweetnacl"
+nacl.util = require('tweetnacl-util');
+
 /**
  * Generate device public and private key pairs
  */
-export default function generateDeviceKeys() {
-  return {
-    publicKey: "",
-    privateKey: ""
+function generateDeviceKeys() {
+  let keys = nacl.sign.keyPair()
+  keys = {
+    "publicKey": nacl.util.encodeBase64(keys.publicKey),
+    "secretKey": nacl.util.encodeBase64(keys.secretKey)
   }
+  return keys
 }
 
 /**
@@ -13,8 +18,8 @@ export default function generateDeviceKeys() {
  * @param {*} private_key_hex 
  * @param {*} message 
  */
-export default function signMessage(private_key_hex, message) {
-  return "hash"
+function signMessage(secretKey, message) {
+  return nacl.sign(message, secretKey)
 }
 
 /**
@@ -23,6 +28,12 @@ export default function signMessage(private_key_hex, message) {
  * @param {*} publicKey 
  * @param {*} signedMessage 
  */
-export default function verifyJunoPassMessage(publicKey, signedMessage) {
-  return "decoded message"
+function verifyJunoPassMessage(publicKey, signedMessage) {
+  return nacl.sign.open(signedMessage, publicKey)
+}
+
+export default {
+  generateDeviceKeys: generateDeviceKeys,
+  signedMessage: signMessage,
+  verifyJunoPassMessage: verifyJunoPassMessage
 }
