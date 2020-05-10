@@ -1,10 +1,9 @@
-var assert = require('chai').assert;
 import nacl from "tweetnacl"
-
-nacl.util = require('tweetnacl-util');
+var assert = require('chai').assert;
 
 import signatures from "./../src/signatures"
 
+nacl.util = require('tweetnacl-util');
 
 describe('generateDeviceKeys', function () {
   it('should return a publicKey and secretKey', function () {

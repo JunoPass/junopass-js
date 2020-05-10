@@ -1,43 +1,67 @@
-import {
-    generateDeviceKeys,
-    signMessage
-} from "./src/signatures"
+import signatures from "./src/signatures"
 
-export default function JunoPass() {
-    return {
-        /**
-         * Generates device signing key
-         * Use this only on new devices e.g during setup/registration.
-         * Consider keeping the keys in a safe place for future use.
-         * Note the private_key must never be shared.
-         */
-        setupDevice(method, identifier, public_key) {
-            return generateDeviceKeys()
-        },
-        /**
-         * Submit authentication details to JunoPass. Verify signed challenge hash for authenticity.
-         * @param {*} method 
-         * @param {*} identifier 
-         * @param {*} public_key 
-         */
-        authenticate(method, identifier, public_key) {
-            return {
-                validChallenge: "",
-                deviceID: "",
-                isLoginRequest: false
-            }
-        },
-        /**
-         * Verify OTP message. Send back the user OTP plus a valid challenge obtained in step 1 i.e authenticate function.
-         * @param {*} challenge 
-         * @param {*} device_id 
-         * @param {*} private_key_hex 
-         * @param {*} otp 
-         */
-        verify(challenge, device_id, private_key_hex, otp) {
-            let message_hash = signMessage()
-            let response = {}
-            return response
+export default {
+    /**
+     * projectID from JunoPass
+     */
+    projectID: "",
+    /**
+     * accessToken from JunoPass
+     */
+    accessToken: "",
+    /**
+     * junoPassPublicKey from JunoPass
+     */
+    junoPassPublicKey: "",
+    /**
+     * Generates device signing key
+     * Use this only on new devices e.g during setup/registration.
+     * Consider keeping the keys in a safe place for future use.
+     * Note the private_key must never be shared.
+     */
+    setupDevice(method, identifier, public_key) {
+        return signatures.generateDeviceKeys()
+    },
+    /**
+     * Submit authentication details to JunoPass. Verify signed challenge hash for authenticity.
+     * @param {*} method 
+     * @param {*} identifier 
+     * @param {*} publicKey 
+     */
+    authenticate(method, identifier, publicKey) {
+        if (!this.accessToken) throw new Error("Access token is required")
+        if (!this.projectID) throw new Error("Project ID is required")
+        if (!this.junoPassPublicKey) throw new Error("JunoPass Public Key is required")
+
+        if (!method) throw new Error("method is required")
+        if (!identifier) throw new Error("identifier is required")
+        if (!publicKey) throw new Error("publicKey is required")
+
+        return {
+            validChallenge: "",
+            deviceID: "",
+            isLoginRequest: false
         }
+    },
+    /**
+     * Verify OTP message. Send back the user OTP plus a valid challenge obtained in step 1 i.e authenticate function.
+     * @param {*} challenge 
+     * @param {*} deviceID 
+     * @param {*} privateKey 
+     * @param {*} otp 
+     */
+    verify(challenge, deviceID, privateKey, otp) {
+        if (!this.accessToken) throw new Error("Access token is required")
+        if (!this.projectID) throw new Error("Project ID is required")
+        if (!this.junoPassPublicKey) throw new Error("JunoPass Public Key is required")
+
+        if (!challenge) throw new Error("challenge is required")
+        if (!deviceID) throw new Error("deviceID is required")
+        if (!privateKey) throw new Error("privateKey is required")
+
+        let message_hash = signatures.signedMessage()
+        let response = {}
+        return response
     }
+
 }
