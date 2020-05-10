@@ -17,16 +17,18 @@ describe('setupDevice', function () {
 
 describe('authenticate', function () {
     it('should return a challenge and device id', function () {
-        junopass.accessToken = "xx"
-        junopass.junoPassPublicKey = "xx"
-        junopass.projectID = 1
+        junopass.accessToken = "8c7a60ada2a65933f0a431921b45368a45fe424d"
+        junopass.junoPassPublicKey = "ae7b59d370ec4d04011baf2738ef068cb1dde6d22e55d16e6ccc0f6c69307cc4"
+        junopass.projectID = "20cbc960-f786-45fa-a3ad-a9659b097a41"
 
         let keys = junopass.setupDevice()
         let publicKey = keys.publicKey
-        let resp = junopass.authenticate("EMAIL", "test@gmail.com", publicKey)
-
-        assert.notEqual(resp, null)
-        assert.notEqual(resp.validChallenge, null)
-        assert.notEqual(resp.deviceID, null)
+        junopass.authenticate("EMAIL", "felix.cheruiyot@kenyaapps.net", publicKey).then(function (resp) {
+            assert.notEqual(resp, null)
+            assert.notEqual(resp.validChallenge, null)
+            assert.notEqual(resp.deviceID, null)
+        }).catch(function (err) {
+            console.error("Error experienced", err)
+        })
     });
 });

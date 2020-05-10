@@ -34,6 +34,6 @@ function verifyJunoPassMessage(publicKey, signedMessage) {
 
 export default {
   generateDeviceKeys: generateDeviceKeys,
-  signedMessage: signMessage,
+  signMessage: signMessage,
   verifyJunoPassMessage: verifyJunoPassMessage
 }

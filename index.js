@@ -1,4 +1,9 @@
+import nacl from "tweetnacl"
+nacl.util = require('tweetnacl-util');
+
+
 import signatures from "./src/signatures"
+import client from "./src/client"
 
 export default {
     /**
@@ -37,11 +42,35 @@ export default {
         if (!identifier) throw new Error("identifier is required")
         if (!publicKey) throw new Error("publicKey is required")
 
-        return {
-            validChallenge: "",
-            deviceID: "",
-            isLoginRequest: false
+        let self = this
+        let payload = {
+            "method": method,
+            "identifier": identifier,
+            "public_key": publicKey,
+            "project_id": this.projectID
         }
+
+        return client.authenticateRequest(this.accessToken, payload).then(function (resp) {
+            let deviceID = resp.device_id
+            let challenge = resp.challenge
+            let loginRequest = resp.login_request
+            let junoPassPublicKey = null
+            let verified = null
+
+            junoPassPublicKey = Buffer.from(self.junoPassPublicKey, 'hex')
+            challenge = Buffer.from(challenge, 'hex')
+            verified = signatures.verifyJunoPassMessage(junoPassPublicKey, challenge)
+
+            let validChallenge = nacl.util.encodeUTF8(verified)
+            return {
+                validChallenge: validChallenge,
+                deviceID: deviceID,
+                isLoginRequest: loginRequest
+            }
+
+        }).catch(function (err) {
+            throw err
+        })
     },
     /**
      * Verify OTP message. Send back the user OTP plus a valid challenge obtained in step 1 i.e authenticate function.
