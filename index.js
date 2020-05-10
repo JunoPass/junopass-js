@@ -32,6 +32,21 @@ export default {
      * @param {*} method 
      * @param {*} identifier 
      * @param {*} publicKey 
+     * 
+     * @example:
+     * junopass.accessToken = "xxx"
+     * junopass.junoPassPublicKey = "ae7b59d370ec4d04011baf2738ef068cb1dde6d22e55d16e6ccc0f6c69307cc4"
+     * junopass.projectID = "xxx"
+     * 
+     * let keys = junopass.setupDevice()
+     * let publicKey = keys.publicKey
+     * junopass.authenticate("EMAIL", "user@test.com", publicKey).then(function (resp) {
+     *      assert.notEqual(resp, null)
+     *      assert.notEqual(resp.validChallenge, null)
+     *      assert.notEqual(resp.deviceID, null)
+     *  }).catch(function (err) {
+     *      console.error("Error experienced", err)
+     *  })
      */
     authenticate(method, identifier, publicKey) {
         if (!this.accessToken) throw new Error("Access token is required")
@@ -60,6 +75,7 @@ export default {
             junoPassPublicKey = Buffer.from(self.junoPassPublicKey, 'hex')
             challenge = Buffer.from(challenge, 'hex')
             verified = signatures.verifyJunoPassMessage(junoPassPublicKey, challenge)
+            if (!verified) throw new Error("Invalid challenge returned")
 
             let validChallenge = nacl.util.encodeUTF8(verified)
             return {
@@ -78,6 +94,17 @@ export default {
      * @param {*} deviceID 
      * @param {*} privateKey 
      * @param {*} otp 
+     * 
+     * @example:
+     *  junopass.verify(challenge, deviceID, devicePrivateKey, otp).then(function (resp) {
+     *      // Print all items returned
+     *      console.log(res)
+     *      let jwtToken = res.access_token
+     *      // Save user token and login user normally.
+     *      console.log(jwtToken)
+     *  }).catch(function (err) {
+     *      console.error("Error experienced", err)
+     *  })
      */
     verify(challenge, deviceID, privateKey, otp) {
         if (!this.accessToken) throw new Error("Access token is required")
@@ -88,9 +115,37 @@ export default {
         if (!deviceID) throw new Error("deviceID is required")
         if (!privateKey) throw new Error("privateKey is required")
 
-        let message_hash = signatures.signedMessage()
-        let response = {}
-        return response
+        let self = this
+        let payload = null
+        let date = new Date()
+        let timestamp = date.getTime()
+        let message = `${challenge}*${timestamp}`
+        if (otp) {
+            message = `${challenge}*${timestamp}*${otp}`
+        }
+
+        privateKey = nacl.util.decodeBase64(privateKey)
+        message = nacl.util.decodeUTF8(message)
+        let signedMessage = signatures.signMessage(privateKey, message)
+
+        payload = {
+            "device_id": deviceID,
+            "signed_hash": signedMessage,
+            "project_id": this.projectID
+        }
+
+        return client.verifyRequest(this.accessToken, payload).then(function (resp) {
+            let accessTokenSigned = resp.access_token_hash
+            junoPassPublicKey = Buffer.from(self.junoPassPublicKey, 'hex')
+            accessTokenSigned = Buffer.from(accessTokenSigned, 'hex')
+            verified = signatures.verifyJunoPassMessage(junoPassPublicKey, accessTokenSigned)
+            if (!verified) throw new Error("Invalid access_token_hash returned")
+
+            return resp
+
+        }).catch(function (err) {
+            throw err
+        })
     }
 
 }

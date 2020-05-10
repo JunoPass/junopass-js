@@ -18,7 +18,7 @@ function authenticateRequest(access_token, payload) {
     }).then(function (resp) {
         return resp.data
     }).catch(function (err) {
-        console.error(err.response.data)
+        throw new Error(err.response.data)
     })
 }
 
@@ -38,7 +38,7 @@ function verifyRequest(access_token, payload) {
     }).then(function (resp) {
         return resp.data
     }).catch(function (err) {
-        console.error(err.response.data)
+        throw new Error(err.response.data)
     })
 }
 
